@@ -25,6 +25,12 @@ unset(OpenCV_DIR CACHE)
 set(TMP_PREFIX_PATH ${CMAKE_PREFIX_PATH})
 set(CMAKE_PREFIX_PATH "$ENV{HOME}/.local")
 find_package(OpenCV 2.4.13 REQUIRED)
+find_package(Qt5Gui)
+find_package(Qt5Core)
+find_package(Qt5Widgets)
+find_package(Qt5Test)
+find_package(Qt5Concurrent)
+find_package(Qt5OpenGL)
 # restore CMAKE_PREFIX_PATH and other cached variables
 # so nothing other package finds this opencv
 set(CMAKE_PREFIX_PATH ${TMP_PREFIX_PATH})
@@ -49,6 +55,10 @@ rosbuild_gensrv()
 message("OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
 message("OpenCV_LIBRARIES: ${OpenCV_LIBRARIES}")
 
+find_package(Boost COMPONENTS system filesystem thread REQUIRED)
+find_package (PCL REQUIRED)
+include_directories(${PCL_INCLUDE_DIRECTORIES})
+
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
@@ -64,7 +74,7 @@ target_link_libraries(disp_rostime ${OpenCV_LIBRARIES})
 rosbuild_add_executable(cv_usb_node
       src/cv_usb_node.cpp
       src/vision_util.cpp)
-target_link_libraries(cv_usb_node ${OpenCV_LIBRARIES} libcv_bridge.so)
+target_link_libraries(cv_usb_node ${OpenCV_LIBRARIES} libcv_bridge.so ${Boost_LIBRARIES})
 # NOTE: libcv_bridge.so is a quick hack. In manifest.xml cv_bridge is omitted.
 # Otherwise it causes linking opencv 2.4.8 and 2.4.13 simultaneously
 # which caused other compile issue.
@@ -76,4 +86,4 @@ rosbuild_add_executable(visual_skin_node2
       src/usb_stereo.cpp
       src/vision_util.cpp
       src/pcl_util.cpp)
-target_link_libraries(visual_skin_node2 ${OpenCV_LIBRARIES})
+target_link_libraries(visual_skin_node2 ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${PCL_LIBRARIES})
